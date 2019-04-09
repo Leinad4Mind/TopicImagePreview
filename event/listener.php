@@ -105,7 +105,7 @@ class listener implements EventSubscriberInterface
 				FROM ' . POSTS_TABLE . '
 				WHERE topic_id = ' . (int) $topic_id . '
 					AND post_visibility = ' . ITEM_APPROVED . '
-					AND post_text ' . $this->db->sql_like_expression('<r>' . $this->db->get_any_char() . '<IMG ' . $this->db->get_any_char()) . '
+					AND post_text ' . $this->db->sql_like_expression('<r>' . $this->db->get_any_char() . '<POSTER ' . $this->db->get_any_char()) . '
 				ORDER BY post_time ' . ($this->config->offsetGet('vse_tip_new') ? 'DESC' : 'ASC') . '
 				LIMIT 1)';
 
@@ -139,7 +139,7 @@ class listener implements EventSubscriberInterface
 	{
 		// Check if we have any post text or images
 		$row = $event['row'];
-		if (empty($row['post_text']) || !preg_match('/^<[r][ >]/', $row['post_text']) || strpos($row['post_text'], '<IMG ') === false)
+		if (empty($row['post_text']) || !preg_match('/^<[r][ >]/', $row['post_text']) || strpos($row['post_text'], '<POSTER ') === false)
 		{
 			return;
 		}
@@ -149,7 +149,7 @@ class listener implements EventSubscriberInterface
 		$dom = new \DOMDocument;
 		$dom->loadXML($row['post_text']);
 		$xpath = new \DOMXPath($dom);
-		foreach ($xpath->query('//IMG[not(ancestor::IMG)]/@src') as $image)
+		foreach ($xpath->query('//POSTER[not(ancestor::POSTER)]/@src') as $image)
 		{
 			$images[] = $image->textContent;
 		}
